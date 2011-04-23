@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+set -e
+
+if [ $# -ne 2 ]; then
+        echo "Usage: litcomp-multi LITCOMP_MULTI_HOME CONFIG_PATH" 1>&2
+        exit 1
+fi
+
+export LITCOMP_MULTI_HOME="$1"
+
+cd "$LITCOMP_MULTI_HOME"
+
+/usr/bin/env node src/server/js/server.js
