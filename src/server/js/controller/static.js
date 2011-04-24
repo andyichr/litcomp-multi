@@ -9,7 +9,7 @@ var getFile = ( function() {
 		if ( file ) {
 			onData( file["data"] );
 		} else {
-			fs.readFile( "src/server/static/" + fileName.replace( "..", "" ), function( err, data ) {
+			fs.readFile( "src/client/static/" + fileName.replace( "..", "" ), function( err, data ) {
 				if ( err ) onNotFound();
 				files[fileName] = {
 					data: data

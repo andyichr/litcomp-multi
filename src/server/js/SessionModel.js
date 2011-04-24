@@ -5,7 +5,7 @@ exports.createSessionModel = function() {
 	var ifc = {};
 
 	ifc.getSession = function( key ) {
-		if ( !sessions[key] ) {
+		if ( typeof( sessions[key] ) == "undefined" ) {
 			sessions[key] = {};
 		}
 
