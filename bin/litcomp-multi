@@ -11,4 +11,4 @@ export LITCOMP_MULTI_HOME="$1"
 
 cd "$LITCOMP_MULTI_HOME"
 
-/usr/bin/env node src/server/js/server.js
+/usr/bin/env node src/server/js/server.js "$2"
