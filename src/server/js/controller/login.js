@@ -7,6 +7,15 @@ exports.onRequest = function( req ) {
 
 		req.getTemplate( "login", function( loginSrc ) {
 			req.res.write( loginSrc );
+			req.res.write( "<script>var serverData = " );
+
+			req.res.write( JSON.stringify( {
+				"errorMessage": req.userSession["errorMessage"]
+			} ) );
+
+			req.res.write( "</script>" );
+
+			delete req.userSession["errorMessage"];
 
 			req.getTemplate( "footer", function( footerSrc ) {
 				req.res.write( footerSrc );

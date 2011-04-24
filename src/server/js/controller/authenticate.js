@@ -8,10 +8,11 @@ var extensions = [new openid.AttributeExchange( {
 	"http://axschema.org/namePerson/last": "required"
 } )];
 
-function error( res, inputOpenid ) {
+function error( req, inputOpenid ) {
 	console.log( "error encountered with inputOpenid: '" + inputOpenid + "'" );
-	res.writeHead( 302, { "location": "/litcomp-multi/login" } );
-	res.end();
+	req.res.writeHead( 302, { "location": "/litcomp-multi/login" } );
+	req.res.end();
+	req.userSession["errorMessage"] = "Unable to authenticate using that OpenID provider.";
 	return;
 }
 
@@ -39,12 +40,12 @@ exports.onRequest = function( req ) {
 		console.log( "got openid authenticate request from user: '" + inputOpenid + "'" );
 
 		if ( ! inputOpenid ) {
-			return error( req.res, inputOpenid );
+			return error( req, inputOpenid );
 		}
 
 		relyingParty.authenticate( inputOpenid, false, function( authUrl ) {
 			if ( ! authUrl ) {
-				return error( req.res, inputOpenid );
+				return error( req, inputOpenid );
 			}
 
 			req.res.writeHead( 302, { "location": authUrl } );
