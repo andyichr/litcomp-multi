@@ -21,6 +21,7 @@ exports.onRequest = function( req ) {
 		} else {
 			req.res.writeHead( 302, { "location": "/litcomp-multi/login" } );
 			req.res.end();
+			req.userSession["errorMessage"] = "OpenID provider reported failed authentication.";
 			console.log( "user was not authenticated" );
 		}
 	} );
