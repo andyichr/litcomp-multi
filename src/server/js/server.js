@@ -6,22 +6,28 @@ var openid = require( "openid" );
 var Cookies = require( "cookies" );
 
 var SessionModel = require( "./SessionModel.js" );
+var UserModel = require( "./UserModel.js" );
 
 fs.readFile( process.argv[2], function( err, data ) {
 	var config = JSON.parse( data );
 
 	var getTemplate = ( function() {
-		var templates = {
-			"header": {
-				"path": "src/client/html/header.html"
-			},
-			"footer": {
-				"path": "src/client/html/footer.html"
-			},
-			"login": {
-				"path": "src/client/html/login.html"
+		var templates = {};
+
+		fs.readdir( "src/client/html", function( err, files ) {
+			for ( var i = 0; i < files.length; i ++ ) {
+				var file = files[i];
+
+				if ( file.substring( file.length - (new String( ".html" ) ).length ) == ".html" ) {
+					var templateNameParts = file.split( "/" );
+					var templateName = templateNameParts[templateNameParts.length-1].substring( 0, templateNameParts[templateNameParts.length-1].length - ( new String( ".html" ) ).length );
+					templates[templateName] = {
+						"path": "src/client/html/" + templateName + ".html"
+					};
+					console.log( "registered template: '" + templateName + "'" );
+				}
 			}
-		};
+		} );
 
 		return function( templateName, onData ) {
 			var template = templates[templateName];
@@ -39,6 +45,7 @@ fs.readFile( process.argv[2], function( err, data ) {
 	}() );
 
 	var session = SessionModel.createSessionModel();
+	var userModel = UserModel.createUserModel( config );
 
 	console.log( "scanning for controllers..." );
 
@@ -98,6 +105,7 @@ fs.readFile( process.argv[2], function( err, data ) {
 				cookies: cookies,
 				userSession: userSession,
 				session: session,
+				userModel: userModel,
 				getTemplate: getTemplate
 			} );
 		} );

@@ -32,8 +32,9 @@ exports.onRequest = function( req ) {
 	console.log( "set userSession.requestedPath to '" + requestedPath + "'" );
 
 	// TODO add branch where req is proxied to litcomp server if user is authenticated
-	if ( authenticated( req.req ) ) {
+	if ( authenticated( req ) ) {
 		// TODO proxy the request
+		console.log( "proxying authenticated request to the application..." );
 	} else {
 		req.res.writeHead( 302, { "location": "/litcomp-multi/login" } );
 		req.res.end();

@@ -1,6 +1,6 @@
 var querystring = require( "querystring" );
-var openid = require('openid');
-var url = require('url');
+var openid = require( "openid" );
+var url = require( "url" );
 
 var extensions = [new openid.AttributeExchange( {
 	"http://axschema.org/contact/email": "required",
