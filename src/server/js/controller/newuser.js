@@ -1,6 +1,10 @@
+var Recaptcha = require( "recaptcha" ).Recaptcha;
+
 exports.onRequest = function( req ) {
 
-	// present login screen
+	var recaptcha = new Recaptcha( req.config["litcomp-multi"]["recaptcha"]["key"]["public"],
+			req.config["litcomp-multi"]["recaptcha"]["key"]["private"] );
+
 	req.res.writeHead( 200, { "content-type": "text/html" } );
 
 	req.getTemplate( "header", function( headerSrc ) {
@@ -8,24 +12,23 @@ exports.onRequest = function( req ) {
 
 		req.getTemplate( "newuser", function( newuserSrc ) {
 			req.res.write( newuserSrc );
+			req.res.write( "<div id=\"recap\">" );
+			req.res.write( recaptcha.toHTML() );
+			req.res.write( "</div>" );
 
-			req.getTemplate( "recaptcha", function( recaptchaSrc ) {
-				req.res.write( recaptchaSrc );
+			req.res.write( "<script>\nvar serverData = " );
 
-				req.res.write( "<script>var serverData = " );
+			req.res.write( JSON.stringify( {
+				"errorMessage": req.userSession["captchaErrorMessage"],
+			} ) );
 
-				req.res.write( JSON.stringify( {
-					"errorMessage": req.userSession["captchaErrorMessage"]
-				} ) );
+			req.res.write( ";\n</script>\n" );
 
-				req.res.write( "</script>" );
+			delete req.userSession["captchaErrorMessage"];
 
-				delete req.userSession["captchaErrorMessage"];
-
-				req.getTemplate( "footer", function( footerSrc ) {
-					req.res.write( footerSrc );
-					req.res.end();
-				} );
+			req.getTemplate( "footer", function( footerSrc ) {
+				req.res.write( footerSrc );
+				req.res.end();
 			} );
 		} );
 	} );

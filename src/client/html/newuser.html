@@ -1,7 +1,19 @@
 <h1>New User</h1>
 
-<p>Your account was successfully verified via OpenID.</p>
+<p>
 
-<p>There is not yet a wiki account associated with that OpenID.</p>
+	Your account was successfully verified via OpenID, but there
+	is not yet a wiki account associated with that OpenID. Please
+	complete the following CAPTCHA to request an account on this
+	application.
 
-<p><button>Request Account</button></p>
+</p>
+
+<form method="POST" action="/litcomp-multi/newuser_submit">
+	<div id="recaptcha-holder"><!-- RECAPTCHA PLACEHOLDER --></div>
+	<div id="errormsg"><!-- ERROR MESSAGE PLACEHOLDER --></div>
+	<p><button type="submit">Request Account</button></p>
+</form>
+
+<script src="/litcomp-multi/static/newuser.js"></script>
+<script src="/litcomp-multi/static/errormsg.js"></script>
