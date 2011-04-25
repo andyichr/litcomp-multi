@@ -40,13 +40,14 @@ exports.onRequest = function( req ) {
 				req.res.end();
 			};
 
-			var onRecognizedUser = function() {
+			var onRecognizedUser = function( user ) {
 
 				// the openid has been associated with an approved user; consider this user logged-in
 				console.log( "encountered recognized user: '" + userKey + "'" );
 				var redirectTo = req.userSession["requestedPath"] || "/";
 				console.log( "redirecting user to: '" + redirectTo + "'" );
 				req.userSession["authorized"] = true;
+				req.userSession["user"] = user;
 				req.res.writeHead( 302, { "location": redirectTo } );
 				req.res.end();
 			};
@@ -56,7 +57,7 @@ exports.onRequest = function( req ) {
 				if ( userKey ) {
 					req.userModel.getUser( userKey, function( user ) {
 						if ( user && user["approved"] ) {
-							onRecognizedUser();
+							onRecognizedUser( user );
 						} else {
 							onUnrecognizedUser();
 						}
