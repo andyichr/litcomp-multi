@@ -136,6 +136,36 @@ exports.createUserModel = function( config ) {
 		onValid();
 	};
 
+	ifc.approve = function( userKey, onResult ) {
+		ifc.getUser( userKey, function( user ) {
+			if ( ! user ) {
+				onResult( "user not found" );
+				return;
+			}
+
+			user["approved"] = true;
+
+			ifc.saveUser( userKey, user, function( err ) {
+				onResult( err );
+			} );
+		} );
+	};
+
+	ifc.promote = function( userKey, onResult ) {
+		ifc.getUser( userKey, function( user ) {
+			if ( ! user ) {
+				onResult( "user not found" );
+				return;
+			}
+
+			user["admin"] = true;
+
+			ifc.saveUser( userKey, user, function( err ) {
+				onResult( err );
+			} );
+		} );
+	};
+
 	ifc.createUser = function( newUser, onResult ) {
 		newUser["approved"] = false;
 		ifc.validateUser( newUser, function() {
@@ -159,7 +189,10 @@ exports.createUserModel = function( config ) {
 		} );
 	}
 
-	ifc.rmUser = function( key, onResult ) {
+	ifc.remove = function( key, onResult ) {
+		fs.unlink( dataDir + "/" + sanitizeKey( key ) + ".js", function( err ) {
+			onResult( err );
+		} );
 	};
 
 	ifc.userExists = function( key, onResult ) {
