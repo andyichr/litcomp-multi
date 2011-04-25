@@ -76,8 +76,8 @@ exports.onRequest = function( req ) {
 					}
 				} );
 
-				req.res.writeHead( 200, { "content-type": "text/plain" } );
-				req.res.end( "OK" );
+				req.res.writeHead( 302, { "location": "/litcomp-multi/newuser_ty" } );
+				req.res.end();
 			} else {
 				error( req, "CAPTCHA verification failed" );
 			}
