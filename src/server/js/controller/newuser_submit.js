@@ -33,6 +33,25 @@ exports.onRequest = function( req ) {
 
 			if ( success ) {
 				// save new user data and send admin email
+				req.userModel.createUser( {
+					"email": req.userSession["openidResult"]["http://axschema.org/contact/email"],
+					"name": {
+						"first": req.userSession["openidResult"]["http://axschema.org/namePerson/first"],
+						"last": req.userSession["openidResult"]["http://axschema.org/namePerson/last"]
+					},
+					"openid": [
+						req.userSession["openidResult"]["claimedIdentifier"]
+					]
+				}, function( user ) {
+					if ( user ) {
+						req.userModel.saveUser( user["email"], user, function( err ) {
+							console.log( "user saved; sending email to admin" );
+						} );
+					} else {
+						console.log( "error occurred while saving new user in newuser_submit controller" );
+					}
+				} );
+
 				req.res.writeHead( 200, { "content-type": "text/plain" } );
 				req.res.end( "OK" );
 			} else {

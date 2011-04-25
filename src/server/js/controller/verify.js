@@ -31,9 +31,6 @@ exports.onRequest = function( req ) {
 
 			var userKey = result["http://axschema.org/contact/email"];
 
-			if ( ! userKey ) {
-			}
-
 			var onUnrecognizedUser = function() {
 				// openid is not recognized; present user with captcha and add in
 				// a new unapproved user
@@ -44,17 +41,26 @@ exports.onRequest = function( req ) {
 			};
 
 			var onRecognizedUser = function() {
-				console.log( "encountered recognized user: '" + userKey + "'" );
+
 				// the openid has been associated with an approved user; consider this user logged-in
+				console.log( "encountered recognized user: '" + userKey + "'" );
+				var redirectTo = req.userSession["requestedPath"] || "/";
+				console.log( "redirecting user to: '" + redirectTo + "'" );
 				req.userSession["authorized"] = true;
-				req.res.writeHead( 302, { "location": req.userSession["requestedPath"] } );
+				req.res.writeHead( 302, { "location": redirectTo } );
 				req.res.end();
 			};
 
 			// see if there exists a user with this openid
 			req.userModel.getKeyHavingOpenID( result.claimedIdentifier, function( userKey ) {
 				if ( userKey ) {
-					onRecognizedUser();
+					req.userModel.getUser( userKey, function( user ) {
+						if ( user && user["approved"] ) {
+							onRecognizedUser();
+						} else {
+							onUnrecognizedUser();
+						}
+					} );
 				} else {
 					onUnrecognizedUser();
 				}

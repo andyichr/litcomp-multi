@@ -1,4 +1,5 @@
 var fs = require( "fs" );
+var util = require( "util" );
 
 exports.createUserModel = function( config ) {
 
@@ -14,15 +15,19 @@ exports.createUserModel = function( config ) {
 	console.log( "UserModel is using path '" + dataDir + "' for data persistence" );
 
 	var sanitizeKey = function( key ) {
-		return ( "" + key ).replace( ".", "" );
+		return ( "" + key.replace( /\//g, "" ) );
 	};
 
 	ifc.getUser = function( key, onResult ) {
 		key = sanitizeKey( key );
-		fs.readFile( dataDir + "/" + key, function( err, data ) {
-			if ( err ) throw err;
-			var user = JSON.decode( data );
-			onResult( user );
+		fs.readFile( dataDir + "/" + key + ".js", function( err, data ) {
+			if ( err ) {
+				console.log( "error (possibly harmless) while reading user data: '" + err + "'" );
+				onResult( undefined );
+			} else {
+				var user = JSON.parse( data );
+				onResult( user );
+			}
 		} );
 	};
 
@@ -37,8 +42,8 @@ exports.createUserModel = function( config ) {
 			for ( var i = 0; i < files.length && cont; i++ ) {
 				var file = files[i];
 
-				if ( file.substring( 0, file.length - ( new String( ".js" ) ).length ) == ".js" ) {
-					cont = onUserKey( file );
+				if ( file.substring( file.length - ( new String( ".js" ) ).length ) == ".js" ) {
+					cont = onUserKey( file.substring( 0, file.length - ( new String( ".js" ) ).length ) );
 				}
 			}
 
@@ -48,28 +53,67 @@ exports.createUserModel = function( config ) {
 
 	ifc.getKeyHavingOpenID = function( openID, onResult ) {
 		var found = false;
+		var numChecking = 0;
+		var finalNumChecking = undefined;
 		
 		ifc.iterateUserKeys( function( thisUserKey ) {
-			var thisUser = ifc.getUser( thisUserKey );
-			var openIDs = thisUser["openid"];
+			numChecking++;
+			ifc.getUser( thisUserKey, function( thisUser ) {
+				numChecking--;
+				var openIDs = thisUser["openid"];
 
-			for ( var i = 0; i < openIDs.length; i++ ) {
-				if ( openIDs[i] == openID ) {
-					onResult( thisUser["email"] );
-					found = true;
-					return false;
+				for ( var i = 0; i < openIDs.length; i++ ) {
+
+					if ( openIDs[i] == openID ) {
+						found = true;
+						onResult( thisUser["email"] );
+						return false;
+					}
 				}
-			}
 
-			return true;
+				if ( typeof( finalNumChecking ) != "undefined"
+						&& finalNumChecking == 0
+						&& ! found ) {
+					onResult( undefined );
+				}
+
+				return true;
+			} );
 		}, function() {
-			if ( ! found ) {
+			finalNumChecking = numChecking;
+
+			if ( finalNumChecking == 0 ) {
 				onResult( undefined );
 			}
 		} );
 	};
 
+	ifc.validateUser = function( user, onValid, onNotValid ) {
+		// TODO implement actual validation routine
+		onValid();
+	};
+
+	ifc.createUser = function( newUser, onResult ) {
+		newUser["approved"] = false;
+		ifc.validateUser( newUser, function() {
+			onResult( newUser );
+		}, function() {
+			onResult( undefined );
+		} );
+	};
+
 	ifc.saveUser = function( key, user, onResult ) {
+		ifc.validateUser( user, function() {
+			fs.writeFile( dataDir + "/" + sanitizeKey( key ) + ".js", JSON.stringify( user ), function( err ) {
+				if ( err ) {
+					console.log( "error encountered in UserModel.saveUser while attempting to save user: '" + err + "'" );
+				}
+
+				onResult( err );
+			} );
+		}, function() {
+			console.log( "UserModel.saveUser was invoked with an invalid user; user will not be saved" );
+		} );
 	}
 
 	ifc.rmUser = function( key, onResult ) {
