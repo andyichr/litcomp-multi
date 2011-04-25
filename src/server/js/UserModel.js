@@ -31,6 +31,48 @@ exports.createUserModel = function( config ) {
 		} );
 	};
 
+	ifc.iterateAdminUsers = function( onAdminUser, onEnd ) {
+		ifc.iterateUsers( function( thisUser ) {
+			if ( thisUser && thisUser["admin"] ) {
+				onAdminUser( thisUser );
+			}
+		}, function() {
+			onEnd();
+		} );
+	};
+
+	ifc.iterateUsers = function( onUser, onEnd ) {
+
+		var numReading = 0;
+		var finalNumReading = undefined;
+
+		ifc.iterateUserKeys( function( userKey ) {
+			numReading++;
+
+			ifc.getUser( userKey, function( thisUser ) {
+				numReading--;
+
+				onUser( thisUser );
+
+				if ( typeof ( finalNumReading != 'undefined' ) ) {
+					finalNumReading--;
+
+					if ( finalNumReading == 0 ) {
+						onEnd();
+					}
+				}
+			} );
+
+		}, function() {
+			finalNumReading = numReading;
+
+			if ( finalNumReading == 0 ) {
+				onEnd();
+			}
+
+		} );
+	};
+
 	ifc.iterateUserKeys = function( onUserKey, onEnd ) {
 		var cont = true;
 
@@ -71,10 +113,11 @@ exports.createUserModel = function( config ) {
 					}
 				}
 
-				if ( typeof( finalNumChecking ) != "undefined"
-						&& finalNumChecking == 0
-						&& ! found ) {
-					onResult( undefined );
+				if ( typeof( finalNumChecking ) != "undefined" ) {
+					finalNumChecking--;
+					if ( finalNumChecking == 0 && ! found ) {
+						onResult( undefined );
+					}
 				}
 
 				return true;
