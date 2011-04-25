@@ -46,6 +46,30 @@ exports.onRequest = function( req ) {
 					if ( user ) {
 						req.userModel.saveUser( user["email"], user, function( err ) {
 							console.log( "user saved; sending email to admin" );
+
+							var approveUser = req.config["litcomp-multi"]["base-url"] + "/litcomp-multi/user/approve/" + user["email"];
+							var promote = req.config["litcomp-multi"]["base-url"] + "/litcomp-multi/user/promote/" + user["email"];
+							var remove = req.config["litcomp-multi"]["base-url"] + "/litcomp-multi/user/remove/" + user["email"];
+
+							var message = "A new user has requested an application account at "
+									+ req.config["litcomp-multi"]["base-url"] + ": \n\n"
+									+ "Email: '" + user["email"] + "'\n"
+									+ "First Name: '" + user["name"]["first"] + "'\n"
+									+ "Last Name: '" + user["name"]["last"] + "'\n\n"
+									+ "Approval:\n\n  To approve this user, visit " + approveUser + "\n\n"
+									+ "Promote:\n\n  To promote this user to admin status, visit " + promote + "\n\n"
+									+ "Remove:\n\n To remove this user from the application, visit " + remove + "\n\n";
+
+							req.userModel.iterateAdminUsers( function( user ) {
+								req.mail.send( {
+									"to": user["email"],
+									"subject": user["email"] + " Requests Application Account at "
+											+ req.config["litcomp-multi"]["base-url"],
+									"message": message
+								} );
+							}, function() {
+								// nothing to do here
+							} );
 						} );
 					} else {
 						console.log( "error occurred while saving new user in newuser_submit controller" );
