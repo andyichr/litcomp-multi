@@ -52,29 +52,14 @@ exports.onRequest = function( req ) {
 			};
 
 			// see if there exists a user with this openid
-			req.userModel.userExists( userKey, function( userExists ) {
-
-				if ( userExists ) {
-					var user = req.userModel.getUser( userKey, function( user ) {
-						var userRecognized = false;
-
-						for ( var i = 0; i < user["openid"].length; i++ ) {
-							if ( user["openid"][i] == result.claimedIdentifier ) {
-								userRecognized = true;
-								onRecognizedUser();
-							}
-						}
-
-						if ( ! userRecognized ) {
-							onUnrecognizedUser();
-						}
-
-					} );
+			req.userModel.getKeyHavingOpenID( result.claimedIdentifier, function( userKey ) {
+				if ( userKey ) {
+					onRecognizedUser();
 				} else {
 					onUnrecognizedUser();
 				}
-
 			} );
+
 		} else {
 			req.res.writeHead( 302, { "location": "/litcomp-multi/login" } );
 			req.res.end();
