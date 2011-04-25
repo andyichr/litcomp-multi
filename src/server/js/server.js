@@ -5,6 +5,7 @@ var querystring = require( "querystring" );
 var openid = require( "openid" );
 var Cookies = require( "cookies" );
 
+var mail = require( "./mail.js" );
 var SessionModel = require( "./SessionModel.js" );
 var UserModel = require( "./UserModel.js" );
 
@@ -100,6 +101,7 @@ fs.readFile( process.argv[2], function( err, data ) {
 
 			controller.onRequest( {
 				config: config,
+				mail: mail,
 				req: req,
 				res: res,
 				cookies: cookies,
