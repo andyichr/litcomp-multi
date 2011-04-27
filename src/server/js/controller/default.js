@@ -1,8 +1,8 @@
 var assert = require( "assert" );
+var httpProxy = require('http-proxy');
 
 function authenticated( req ) {
-	// TODO implement
-	return false;
+	return req.userSession["authorized"];
 }
 
 exports.onRequest = function( req ) {
@@ -31,11 +31,20 @@ exports.onRequest = function( req ) {
 	req.userSession["requestedPath"] = requestedPath;
 	console.log( "set userSession.requestedPath to '" + requestedPath + "'" );
 
-	// TODO add branch where req is proxied to litcomp server if user is authenticated
+	// req is proxied to litcomp server if user is authenticated
 	if ( authenticated( req ) ) {
-		// TODO proxy the request
 		console.log( "proxying authenticated request to the application..." );
+		req.appServer.getApp( req.userSession["user"]["email"], function( err, userApp ) {
+			var proxy = new httpProxy.HttpProxy();
+			var host = userApp.getHost();
+			var port = userApp.getPort();
+			proxy.proxyRequest( req.req, req.res, {
+				host: host,
+				port: port
+			} );
+		} );
 	} else {
+		console.log( "user is not authenticated, so forwarding to login screen" );
 		req.res.writeHead( 302, { "location": "/litcomp-multi/login" } );
 		req.res.end();
 	}

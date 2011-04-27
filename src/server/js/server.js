@@ -1,5 +1,6 @@
 var fs = require( "fs" );
 var http = require( "http" );
+var httpProxy = require('http-proxy');
 var util = require( "util" );
 var querystring = require( "querystring" );
 var openid = require( "openid" );
@@ -8,6 +9,7 @@ var Cookies = require( "cookies" );
 var mail = require( "./mail.js" );
 var SessionModel = require( "./SessionModel.js" );
 var UserModel = require( "./UserModel.js" );
+var AppServer = require( "./AppServer.js" );
 
 fs.readFile( process.argv[2], function( err, data ) {
 	var config = JSON.parse( data );
@@ -47,6 +49,7 @@ fs.readFile( process.argv[2], function( err, data ) {
 
 	var session = SessionModel.createSessionModel();
 	var userModel = UserModel.createUserModel( config );
+	var appServer = AppServer.createAppServer( config );
 
 	console.log( "scanning for controllers..." );
 
@@ -108,7 +111,37 @@ fs.readFile( process.argv[2], function( err, data ) {
 				userSession: userSession,
 				session: session,
 				userModel: userModel,
-				getTemplate: getTemplate
+				getTemplate: getTemplate,
+				appServer: appServer
+			} );
+		} );
+
+		server.on( "upgrade", function( req, socket, head ) {
+			// if user is authenticated, proxy websockets request to application
+			var cookies = new Cookies( req );
+			var sid = cookies.get( "litcomp-multi-sid" );
+			var userSession = session.getSession( sid );
+
+			if ( ! (
+					sid
+					&& userSession
+					&& userSession["authorized"]
+				) ) {
+
+				console.log( "rejected connection upgrade because user is not authenticated" );
+				return;
+			}
+
+			console.log( "proxying connection upgrade for authorized user: " + userSession["user"]["email"] );
+			
+			appServer.getApp( userSession["user"]["email"], function( err, userApp ) {
+				var proxy = new httpProxy.HttpProxy();
+				var host = userApp.getHost();
+				var port = userApp.getPort();
+				proxy.proxyWebSocketRequest( req, socket, head, {
+					host: host,
+					port: port
+				} );
 			} );
 		} );
 
