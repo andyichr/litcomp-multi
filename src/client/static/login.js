@@ -14,7 +14,7 @@ $( function() {
 			"name": "MyOpenID",
 			"image": "myopenid.png",
 			"endpoint": "http://myopenid.com/"
-		},
+		}
 	];
 	$( "#google-button" ).click( function() {
 	} );
