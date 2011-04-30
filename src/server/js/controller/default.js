@@ -21,8 +21,7 @@ exports.onRequest = function( req ) {
 	var urlParts = req.req.url.split("/");
 	var requestedPath;
 
-	if ( urlParts.length > 2
-			&& urlParts[1] == "litcomp-multi" ) {
+	if ( urlParts.length > 2 ) {
 		requestedPath = "/";
 	} else {
 		requestedPath = req.req.url;
