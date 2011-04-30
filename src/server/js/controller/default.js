@@ -34,13 +34,15 @@ exports.onRequest = function( req ) {
 	// req is proxied to litcomp server if user is authenticated
 	if ( authenticated( req ) ) {
 		console.log( "proxying authenticated request to the application..." );
+		var proxy = new httpProxy.HttpProxy();
+		var buffer = proxy.buffer( req.req );
 		req.appServer.getApp( req.userSession["user"]["email"], function( err, userApp ) {
-			var proxy = new httpProxy.HttpProxy();
 			var host = userApp.getHost();
 			var port = userApp.getPort();
 			proxy.proxyRequest( req.req, req.res, {
 				host: host,
-				port: port
+				port: port,
+				buffer: buffer
 			} );
 		} );
 	} else {

@@ -1,5 +1,5 @@
 var fs = require( "fs" );
-var http = require( "http" );
+var https = require( "https" );
 var httpProxy = require('http-proxy');
 var util = require( "util" );
 var querystring = require( "querystring" );
@@ -72,7 +72,12 @@ fs.readFile( process.argv[2], function( err, data ) {
 
 		}
 
-		var server = http.createServer( function ( req, res ) {
+		var options = {
+			key: fs.readFileSync( config["litcomp-multi"]["ssl"]["key"] ),
+			cert: fs.readFileSync( config["litcomp-multi"]["ssl"]["cert"] )
+		};
+
+		var server = https.createServer( options, function ( req, res ) {
 
 			console.log( "serving request: " + req.url );
 			var urlParts = req.url.split("/");
@@ -122,6 +127,9 @@ fs.readFile( process.argv[2], function( err, data ) {
 			var sid = cookies.get( "litcomp-multi-sid" );
 			var userSession = session.getSession( sid );
 
+			var proxy = new httpProxy.HttpProxy();
+			var buffer = proxy.buffer( req );
+
 			if ( ! (
 					sid
 					&& userSession
@@ -135,12 +143,12 @@ fs.readFile( process.argv[2], function( err, data ) {
 			console.log( "proxying connection upgrade for authorized user: " + userSession["user"]["email"] );
 			
 			appServer.getApp( userSession["user"]["email"], function( err, userApp ) {
-				var proxy = new httpProxy.HttpProxy();
 				var host = userApp.getHost();
 				var port = userApp.getPort();
 				proxy.proxyWebSocketRequest( req, socket, head, {
 					host: host,
-					port: port
+					port: port,
+					buffer: buffer
 				} );
 			} );
 		} );

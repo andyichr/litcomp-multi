@@ -1,4 +1,5 @@
 var child_process = require( "child_process" );
+var http = require( "http" );
 
 exports.createAppServer = function( config ) {
 
@@ -59,7 +60,33 @@ exports.createAppServer = function( config ) {
 			return port;
 		};
 
-		onResult( undefined, appIfc );
+		var serverReady = function() {
+			serverReady = function() { };
+			onResult( undefined, appIfc );
+		};
+
+		var pollServerReady = function() {
+			setTimeout( function() {
+				var options = {
+					host: "127.0.0.1",
+					port: port
+				};
+
+				console.log( "polling for server availability on port " + port );
+				
+				http.get( options, function( res ) {
+					console.log( "server is now responding; invoking serverReady" );
+					serverReady();
+					pollServerReady = function() { };
+				} ).on( "error", function( e ) {
+					console.log( "error while polling for app server (this is probably expected): '" + e + "'" );
+
+				} );
+				pollServerReady();
+			}, 100 );
+		};
+
+		pollServerReady();
 	};
 
 	return ifc;
