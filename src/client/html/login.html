@@ -1,14 +1,10 @@
-<h1>Log in</h1>
+<h1>Log In</h1>
 
 <form method="POST" action="/litcomp-multi/authenticate">
 
 	<p>If you have an account at one of the following sites, select it to sign in using that account:</p>
 
-	<ul>
-		<li id="google-button">Google</li>
-		<li id="twitter-button">Twitter</li>
-		<li id="facebook-button">Facebook</li>
-	</ul>
+	<p id="openid_list"></p>
 
 	<p>Alternatively, you may manually enter your OpenID:</p>
 	<p><input type="text" name="openid" id="openid-input" /> <button type="submit" id="submit-button">Log in</button></p>

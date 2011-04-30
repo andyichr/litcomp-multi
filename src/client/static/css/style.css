@@ -1,0 +1,97 @@
+html, body {
+        font-family: sans-serif;
+        font-size: 10pt;
+}
+
+a, a:visited {
+        color: #0645AD;
+        text-decoration: none;
+        cursor: pointer;
+}
+
+h1, h2, h3,
+h4, h5, h6 {
+        clear: both;
+        padding-bottom: 2px;
+}
+
+h1, h2, h3 {
+        border-bottom: 1px solid #AAA;
+}
+
+h1 {
+        border-top: none;
+}
+
+textarea {
+        font-family: monospace;
+        font-size: 125%;
+        width: 80em;
+        /*height: 43em;*/
+        border: 1px solid #AAA;
+        padding: 1em;
+}
+
+.buttons {
+        float: right;
+}
+
+pre {
+        display: inline;
+        white-space: pre-wrap;
+}
+
+div.source {
+        background-color: #DDD;
+        border-radius: 1em;
+        /*border: 1px dashed #2F6FAB;*/
+        padding: 1em;
+}
+
+.CodeMirror-line-numbers {
+        width: 2.2em;
+        color: #aaa;
+        background-color: #AAA;
+        text-align: right;
+        padding-right: .3em;
+        font-size: 10pt;
+        font-family: monospace;
+        padding-top: .4em;
+        overflow: visible;
+}
+
+div.exec-container {
+        float: right;
+        width: 50%;
+        margin-left: 1em;
+        padding: 1em;
+        margin-bottom: 1em;
+        background-color: rgba(206,223,242,1);
+        border-radius: 1em;
+}
+
+div.exec {
+        font-family: monospace;
+        white-space: pre-wrap;
+        overflow: auto;
+        max-height: 400px;
+}
+
+.stderr {
+        color: red;
+}
+
+div.buttons * {
+        font-size: 10pt;
+        font-weight: normal;
+}
+
+p#openid_list img {
+	vertical-align: middle;
+	padding: 5px;
+	border: 3px solid white;
+}
+
+p#openid_list img:hover {
+	border: 3px solid gray;
+}
