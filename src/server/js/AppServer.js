@@ -8,6 +8,10 @@ exports.createAppServer = function( config ) {
 	var cur_port = 0;
 	var start_port = 12000;
 
+	if ( config["litcomp-multi"]["app-port"] ) {
+		start_port = config["litcomp-multi"]["app-port"];
+	}
+
 	/**
 	 * create an application instance once for each unique key
 	 * if the application has not yet been started for the key,

@@ -153,7 +153,15 @@ fs.readFile( process.argv[2], function( err, data ) {
 			} );
 		} );
 
-		server.listen( 8071 );
+		var LISTEN_PORT = config["litcomp-multi"]["port"];
+
+		if (!LISTEN_PORT) {
+			LISTEN_PORT = 8071;
+		}
+
+		server.listen( LISTEN_PORT );
+
+		console.log( "using port: " + LISTEN_PORT );
 		console.log( "server listening at '" + config["litcomp-multi"]["base-url"] + "'" );
 
 	} );

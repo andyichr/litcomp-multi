@@ -15,7 +15,7 @@ exports.createUserModel = function( config ) {
 	console.log( "UserModel is using path '" + dataDir + "' for data persistence" );
 
 	var sanitizeKey = function( key ) {
-		return ( "" + key.replace( /\//g, "" ) );
+		return ( ("" + key).replace( /\//g, "" ) );
 	};
 
 	ifc.getUser = function( key, onResult ) {
@@ -47,12 +47,13 @@ exports.createUserModel = function( config ) {
 		var finalNumReading = undefined;
 
 		ifc.iterateUserKeys( function( userKey ) {
+			var cont = true;
 			numReading++;
 
 			ifc.getUser( userKey, function( thisUser ) {
 				numReading--;
 
-				onUser( thisUser );
+				cont = onUser( thisUser );
 
 				if ( typeof ( finalNumReading != 'undefined' ) ) {
 					finalNumReading--;
@@ -63,6 +64,7 @@ exports.createUserModel = function( config ) {
 				}
 			} );
 
+			return cont;
 		}, function() {
 			finalNumReading = numReading;
 
@@ -95,39 +97,26 @@ exports.createUserModel = function( config ) {
 
 	ifc.getKeyHavingOpenID = function( openID, onResult ) {
 		var found = false;
-		var numChecking = 0;
-		var finalNumChecking = undefined;
 		
-		ifc.iterateUserKeys( function( thisUserKey ) {
-			numChecking++;
-			ifc.getUser( thisUserKey, function( thisUser ) {
-				numChecking--;
-				var openIDs = thisUser["openid"];
+		ifc.iterateUsers( function( thisUser ) {
+			var openIDs = thisUser["openid"];
 
-				for ( var i = 0; i < openIDs.length; i++ ) {
+			for ( var i = 0; i < openIDs.length; i++ ) {
 
-					if ( openIDs[i] == openID ) {
-						found = true;
-						onResult( thisUser["email"] );
-						return false;
-					}
+				if ( openIDs[i] == openID ) {
+					found = true;
+					onResult( thisUser["email"] );
+					return false;
 				}
+			}
 
-				if ( typeof( finalNumChecking ) != "undefined" ) {
-					finalNumChecking--;
-					if ( finalNumChecking == 0 && ! found ) {
-						onResult( undefined );
-					}
-				}
-
-				return true;
-			} );
+			return true;
 		}, function() {
-			finalNumChecking = numChecking;
 
-			if ( finalNumChecking == 0 ) {
+			if ( !found ) {
 				onResult( undefined );
 			}
+
 		} );
 	};
 
